@@ -14,14 +14,15 @@ async function renderItems() {
 	let htmlRender = "";
 	items.forEach((item) => {
 		let htmlContent = `
-		<a href="./product.html?id="${item._id}"">
+		<a href="./product.html?id=${item._id}">
 			<article>
-				<img src="${item.imageUrl}" alt=""${item.altTxt}"">
-				<h3 class="productName">"${item.name}"</h3>
-				<p class="productDescription">"${item.description}"</p>
+				<img src="${item.imageUrl}" alt="${item.altTxt}">
+				<h3 class="productName">${item.name}</h3>
+				<p class="productDescription">${item.description}</p>
 			</article>
-	  	</a>
+		</a>
 		`;
+		console.log(htmlContent);
 		htmlRender += htmlContent;
 	});
 	let itemContainer = document.getElementById("items");
