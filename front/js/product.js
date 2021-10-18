@@ -39,6 +39,17 @@ async function renderItem() {
 		document.getElementById("colors").innerHTML += htmlContent;
 	});
 }
-
 // Calling the function
 renderItem();
+
+// Add to cart & localStorage
+const addToCartBtn = document.getElementById("addToCart");
+
+addToCartBtn.addEventListener("click", () => {
+	// Push in the localStorage
+	localStorage.setItem("id", idVerification());
+	localStorage.setItem("itemQuantity", document.getElementById("quantity").value);
+	localStorage.setItem("itemColor", document.getElementById("colors").value);
+
+	location.href = "./cart.html";
+});
