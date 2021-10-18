@@ -1,17 +1,32 @@
-const itemsList = document.getElementById("items");
-
-function getItemsList() {
-	fetch("http://localhost:3000/api/products", {
-		method: "GET",
-	})
-		.then(function (res) {
-			if (res.ok) {
-				return res.json();
-			}
-		})
-		.then(function (value) {
-			console.log(value);
-		});
+// Get all the information from Bilal's API
+async function getItems() {
+	try {
+		let response = await fetch("http://localhost:3000/api/products");
+		return await response.json();
+	} catch (error) {
+		console.log("Error : " + error);
+	}
 }
 
-getItemsList();
+// Handle the render on the HTML
+async function renderItems() {
+	let items = await getItems();
+	let htmlRender = "";
+	items.forEach((item) => {
+		let htmlContent = `
+		<a href="./product.html?id="${item._id}"">
+			<article>
+				<img src="${item.imageUrl}" alt=""${item.altTxt}"">
+				<h3 class="productName">"${item.name}"</h3>
+				<p class="productDescription">"${item.description}"</p>
+			</article>
+	  	</a>
+		`;
+		htmlRender += htmlContent;
+	});
+	let itemContainer = document.getElementById("items");
+	itemContainer.innerHTML += htmlRender;
+}
+
+// Calling the function
+renderItems();
