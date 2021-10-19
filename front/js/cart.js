@@ -65,12 +65,12 @@ renderEachItem();
 // Empty cart verification
 function checkIfCartEmpty() {
 	if (localStorage.length == 0) {
-		document.getElementById("cart__items").innerHTML = "<p >Il n'y a pas encore de Kanap ici, visitez <a href='./index.html' style=' color:white; font-weight:700'>notre séléction :)</a></p>";
+		document.getElementById("cart__items").innerHTML = "<p >Il n'y a pas encore de Kanap ici, visitez <a href='./index.html' style=' color:white; font-weight:700'>notre séléction 🛋️</a>.</p>";
 	}
 }
 
 /*** 
-DATA MANIPULATION
+ARTICLES DATA MANIPULATION
 ***/
 
 /* Get all the delete btn, link them to they'r DOM and localStorage, add a listener 
@@ -115,8 +115,7 @@ function articleQuantityActualisation() {
 
 			let itemQuantity = e.target.value;
 			if (itemQuantity == 0) {
-				alert("Il faut au moins ajouter un kanap 🛋️");
-				itemQuantity = 1;
+				alert("Il faut au moins ajouter un Kanap 🛋️");
 			}
 			localStorage.setItem(localStorageKey, itemQuantity);
 
@@ -158,3 +157,30 @@ function totalPriceActualisation() {
 	// Check if they'r is no article
 	checkIfCartEmpty();
 }
+
+/*** 
+USER DATA MANIPULATION
+***/
+
+let userBasket = [];
+
+class Form {
+	constructor(input) {
+		this.firstName = document.getElementById("firstName").value;
+		this.lastName = document.getElementById("lastName").value;
+		this.adress = document.getElementById("address").value;
+		this.city = document.getElementById("city").value;
+		this.mail = document.getElementById("email").value;
+	}
+}
+
+let userForm = new Form();
+let userFirstName = userForm.firstName;
+console.log(userFirstName);
+
+let userFormContainer = document.getElementsByTagName("form");
+let userFormSubmit = document.getElementById("order");
+userFormSubmit.addEventListener("submit", (e) => {
+	e.preventDefault();
+	console.log("fire");
+});

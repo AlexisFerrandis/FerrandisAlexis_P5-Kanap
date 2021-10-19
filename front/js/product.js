@@ -51,7 +51,7 @@ addToCartBtn.addEventListener("click", () => {
 	if (itemColor == "") {
 		alert("Il est nécessaire de choisir une couleur 🌈");
 	} else if (itemQuantity == 0) {
-		alert("Il faut au moins ajouter un kanap 🛋️");
+		alert("Il faut au moins ajouter un Kanap 🛋️");
 	} else {
 		let itemInCart = [itemId, itemColor];
 
