@@ -47,7 +47,15 @@ addToCartBtn.addEventListener("click", () => {
 	let itemId = idVerification();
 	let itemColor = document.getElementById("colors").value;
 	let itemQuantity = document.getElementById("quantity").value;
-	let itemInCart = [itemId, itemColor];
+	console.log(itemQuantity);
+	if (itemColor == "") {
+		alert("Il est nécessaire de choisir une couleur 🌈");
+	} else if (itemQuantity == 0) {
+		alert("Il faut au moins ajouter un kanap 🛋️");
+	} else {
+		let itemInCart = [itemId, itemColor];
 
-	localStorage.setItem(itemInCart, itemQuantity);
+		localStorage.setItem(itemInCart, itemQuantity);
+		window.location.href = "./cart.html";
+	}
 });

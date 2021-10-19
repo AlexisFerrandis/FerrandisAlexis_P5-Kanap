@@ -1,9 +1,12 @@
+/*** 
+LOCAL STORAGE & DISPLAY ON CART PAGE
+***/
+
 // Get information for Id in localStorage
 async function getInfoWithId(i) {
 	let idAndColorStr = localStorage.key(i);
 	let idAndColorArray = idAndColorStr.split(",");
 	let itemId = idAndColorArray[0];
-	// let itemColor = idAndColorArray[1];
 	try {
 		let response = await fetch(`http://localhost:3000/api/products/${itemId}`);
 		return await response.json();
@@ -13,10 +16,12 @@ async function getInfoWithId(i) {
 }
 
 // Push dynamically on the HTML for one element
-async function rendererere(i) {
-	let item = await getInfoWithId(i);
-	let htmlContent = `
-    <article class="cart__item" data-id="${item.id}">
+async function renderEachItem() {
+	let htmlRender = "";
+	for (let i = 0; i < localStorage.length; i++) {
+		let item = await getInfoWithId(i);
+		let htmlContent = `
+    <article class="cart__item" data-id="${item._id}" data-color="${localStorage.key(i).split(",")[1]}">
         <div class="cart__item__img">
             <img src="${item.imageUrl}" alt="${item.altTxt}">
         </div>
@@ -37,10 +42,37 @@ async function rendererere(i) {
         </div>
     </article>
     `;
-	document.getElementById("cart__items").innerHTML += htmlContent;
+		htmlRender += htmlContent;
+	}
+	let itemContainer = document.getElementById("cart__items");
+	itemContainer.innerHTML += htmlRender;
+	// Enable deleting item function
+	deleteItem();
 }
+renderEachItem();
 
-// Loop to display all items stored
-for (let i = 0; i < localStorage.length; i++) {
-	rendererere(i);
+/*** 
+DATA MANIPULATION
+***/
+
+/* Get all the delete btn, link them to they'r DOM and localStorage, add a listener 
+to remove them. */
+function deleteItem() {
+	let deleteItemBtns = document.querySelectorAll(".deleteItem");
+
+	for (let i = 0; i < deleteItemBtns.length; i++) {
+		deleteItemBtns[i].addEventListener("click", (e) => {
+			e.preventDefault();
+
+			let articleDOM = deleteItemBtns[i].closest("article");
+			let articleId = articleDOM.dataset.id;
+			let articleColor = articleDOM.dataset.color;
+			let articleQuantity = localStorage.getItem(localStorage.key(i));
+
+			let localStorageKey = [articleId, articleColor];
+
+			localStorage.removeItem(localStorageKey, articleQuantity);
+			articleDOM.remove();
+		});
+	}
 }
