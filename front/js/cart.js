@@ -15,13 +15,17 @@ async function getInfoWithId(i) {
 	}
 }
 
-// Push dynamically on the HTML for one element
+// Push dynamically on the HTML each element, then enable associate function
 async function renderEachItem() {
 	let htmlRender = "";
+	let itemContainer = document.getElementById("cart__items");
+	// Check if they'r is no article
+	checkIfCartEmpty();
 	for (let i = 0; i < localStorage.length; i++) {
+		// Else begin the loop
 		let item = await getInfoWithId(i);
 		let htmlContent = `
-    <article class="cart__item" data-id="${item._id}" data-color="${localStorage.key(i).split(",")[1]}">
+    <article class="cart__item" data-id="${item._id}" data-color="${localStorage.key(i).split(",")[1]}" data-price="${item.price}">
         <div class="cart__item__img">
             <img src="${item.imageUrl}" alt="${item.altTxt}">
         </div>
@@ -44,12 +48,26 @@ async function renderEachItem() {
     `;
 		htmlRender += htmlContent;
 	}
-	let itemContainer = document.getElementById("cart__items");
+
 	itemContainer.innerHTML += htmlRender;
+
 	// Enable deleting item function
 	deleteItem();
+	// Enable quantity modification
+	articleQuantityActualisation();
+	// Initialise the amount total of article
+	totalArticleActualisation();
+	//Initialise the total price of the cart
+	totalPriceActualisation();
 }
 renderEachItem();
+
+// Empty cart verification
+function checkIfCartEmpty() {
+	if (localStorage.length == 0) {
+		document.getElementById("cart__items").innerHTML = "<p >Il n'y a pas encore de Kanap ici, visitez <a href='./index.html' style=' color:white; font-weight:700'>notre séléction :)</a></p>";
+	}
+}
 
 /*** 
 DATA MANIPULATION
@@ -73,6 +91,70 @@ function deleteItem() {
 
 			localStorage.removeItem(localStorageKey, articleQuantity);
 			articleDOM.remove();
+
+			// Actualising the total amount of article
+			totalArticleActualisation();
 		});
 	}
+}
+
+/* Get all the quantity input , link them to they'r DOM and localStorage, add a listener 
+to change them. */
+function articleQuantityActualisation() {
+	let quantitySelector = document.querySelectorAll(".itemQuantity");
+	for (let i = 0; i < quantitySelector.length; i++) {
+		quantitySelector[i].addEventListener("change", (e) => {
+			e.preventDefault();
+
+			// For each article
+			let articleDOM = quantitySelector[i].closest("article");
+			let articleId = articleDOM.dataset.id;
+			let articleColor = articleDOM.dataset.color;
+
+			let localStorageKey = [articleId, articleColor];
+
+			let itemQuantity = e.target.value;
+			if (itemQuantity == 0) {
+				alert("Il faut au moins ajouter un kanap 🛋️");
+				itemQuantity = 1;
+			}
+			localStorage.setItem(localStorageKey, itemQuantity);
+
+			// Actualising the total amount of article
+			totalArticleActualisation();
+		});
+	}
+}
+
+// Actualise the total amount of article in the cart
+function totalArticleActualisation() {
+	let quantitySelector = document.querySelectorAll(".itemQuantity");
+	let articleAmount = 0;
+
+	for (let i = 0; i < quantitySelector.length; i++) {
+		articleAmount += parseInt(quantitySelector[i].value);
+	}
+	let totalQuantityDisplay = document.getElementById("totalQuantity");
+	totalQuantityDisplay.innerHTML = articleAmount;
+
+	totalPriceActualisation();
+}
+
+// Actualise the total price for the cart
+function totalPriceActualisation() {
+	let quantitySelector = document.querySelectorAll(".itemQuantity");
+	let totalCartPrice = 0;
+
+	for (let i = 0; i < quantitySelector.length; i++) {
+		let articleDOM = quantitySelector[i].closest("article");
+		let individualPrice = articleDOM.dataset.price;
+
+		totalCartPrice += parseInt(quantitySelector[i].value) * individualPrice;
+	}
+
+	let totalPriceDisplay = document.getElementById("totalPrice");
+	totalPriceDisplay.innerHTML = totalCartPrice;
+
+	// Check if they'r is no article
+	checkIfCartEmpty();
 }
