@@ -22,7 +22,6 @@ async function renderItems() {
 			</article>
 		</a>
 		`;
-		console.log(htmlContent);
 		htmlRender += htmlContent;
 	});
 	let itemContainer = document.getElementById("items");

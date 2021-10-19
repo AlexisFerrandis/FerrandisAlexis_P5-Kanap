@@ -25,13 +25,9 @@ async function getInfoById() {
 // Handle the render on the HTML
 async function renderItem() {
 	let item = await getInfoById();
-	// Item img
 	document.querySelector(".item__img").innerHTML += `<img src="${item.imageUrl}" alt="${item.altTxt}">`;
-	// Item name
 	document.getElementById("title").innerHTML += item.name;
-	// Item price
 	document.getElementById("price").innerHTML += item.price;
-	// Item description
 	document.getElementById("description").innerHTML += item.description;
 	// Choice of item colors
 	item.colors.forEach((color) => {
@@ -47,9 +43,11 @@ const addToCartBtn = document.getElementById("addToCart");
 
 addToCartBtn.addEventListener("click", () => {
 	// Push in the localStorage
-	localStorage.setItem("id", idVerification());
-	localStorage.setItem("itemQuantity", document.getElementById("quantity").value);
-	localStorage.setItem("itemColor", document.getElementById("colors").value);
 
-	location.href = "./cart.html";
+	let itemId = idVerification();
+	let itemColor = document.getElementById("colors").value;
+	let itemQuantity = document.getElementById("quantity").value;
+	let itemInCart = [itemId, itemColor];
+
+	localStorage.setItem(itemInCart, itemQuantity);
 });
