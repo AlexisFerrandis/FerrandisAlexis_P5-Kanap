@@ -1,10 +1,10 @@
 // Check that the id parameter exists
 function idVerification() {
-	var url = new URL(window.location.href);
-	var search_params = new URLSearchParams(url.search);
+	let url = new URL(window.location.href);
+	let searchParams = new URLSearchParams(url.search);
 
-	if (search_params.has("id")) {
-		var id = search_params.get("id");
+	if (searchParams.has("id")) {
+		let id = searchParams.get("id");
 		return id;
 	} else {
 		console.log("Error, they'r is no id match.");
