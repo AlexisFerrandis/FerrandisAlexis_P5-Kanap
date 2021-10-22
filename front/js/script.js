@@ -9,7 +9,7 @@ async function getItems() {
 }
 
 // Handle the render on the HTML
-async function renderItems() {
+(async function renderItems() {
 	let items = await getItems();
 	let htmlRender = "";
 	items.forEach((item) => {
@@ -24,9 +24,6 @@ async function renderItems() {
 		`;
 		htmlRender += htmlContent;
 	});
-	let itemContainer = document.getElementById("items");
+	const itemContainer = document.getElementById("items");
 	itemContainer.innerHTML += htmlRender;
-}
-
-// Calling the function
-renderItems();
+})();

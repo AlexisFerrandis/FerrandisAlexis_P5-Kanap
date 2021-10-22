@@ -1,12 +1,10 @@
-/*** 
-LOCAL STORAGE & DISPLAY ON CART PAGE
-***/
+/*** LOCAL STORAGE & DISPLAY ON CART PAGE ***/
 
-// Get information for Id in localStorage
+// Get id from localStorage key(i)
 async function getInfoWithId(i) {
-	let idAndColorStr = localStorage.key(i);
-	let idAndColorArray = idAndColorStr.split(",");
-	let itemId = idAndColorArray[0];
+	let idColorStr = localStorage.key(i);
+	let idColorArray = idColorStr.split(",");
+	let itemId = idColorArray[0];
 	try {
 		let response = await fetch(`http://localhost:3000/api/products/${itemId}`);
 		return await response.json();
@@ -15,54 +13,6 @@ async function getInfoWithId(i) {
 	}
 }
 
-// Push dynamically on the HTML each element, then enable associate function
-async function renderEachItem() {
-	let htmlRender = "";
-	let itemContainer = document.getElementById("cart__items");
-	// Check if they'r is no article
-	checkIfCartEmpty();
-	for (let i = 0; i < localStorage.length; i++) {
-		// Else begin the loop
-		let item = await getInfoWithId(i);
-		let htmlContent = `
-    <article class="cart__item" data-id="${item._id}" data-color="${localStorage.key(i).split(",")[1]}" data-price="${item.price}">
-        <div class="cart__item__img">
-            <img src="${item.imageUrl}" alt="${item.altTxt}">
-        </div>
-        <div class="cart__item__content">
-            <div class="cart__item__content__titlePrice">
-                <h2>${item.name}</h2>
-                <p>${item.price} €</p>
-				<p>Coloris : ${localStorage.key(i).split(",")[1]}</p>
-            </div>
-            <div class="cart__item__content__settings">
-                <div class="cart__item__content__settings__quantity">
-                    <p>Qté : </p>
-                    <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${localStorage.getItem(localStorage.key(i))}">
-                </div>
-                <div class="cart__item__content__settings__delete">
-                    <p class="deleteItem">Supprimer</p>
-                </div>
-            </div>
-        </div>
-    </article>
-    `;
-		htmlRender += htmlContent;
-	}
-
-	itemContainer.innerHTML += htmlRender;
-
-	// Enable deleting item function
-	deleteItem();
-	// Enable quantity modification
-	articleQuantityActualisation();
-	// Initialise the amount total of article
-	totalArticleActualisation();
-	// Initialise the total price of the cart
-	totalPriceActualisation();
-}
-renderEachItem();
-
 // Empty cart verification
 function checkIfCartEmpty() {
 	if (localStorage.length == 0) {
@@ -70,50 +20,116 @@ function checkIfCartEmpty() {
 	}
 }
 
-/*** 
-ARTICLES DATA MANIPULATION
-***/
+// Push dynamically each element on the HTML, then enable associate function to them
+(async function renderEachItem() {
+	let htmlRender = "";
+	const itemContainer = document.getElementById("cart__items");
+	// First check if cart is empty
+	checkIfCartEmpty();
+	// Else begin the loop
+	for (let i = 0; i < localStorage.length; i++) {
+		let item = await getInfoWithId(i);
+		let htmlContent = `
+		<article class="cart__item" data-id="${item._id}" data-color="${localStorage.key(i).split(",")[1]}" data-price="${item.price}">
+			<div class="cart__item__img">
+				<img src="${item.imageUrl}" alt="${item.altTxt}">
+			</div>
+			<div class="cart__item__content">
+				<div class="cart__item__content__titlePrice">
+					<h2>${item.name}</h2>
+					<p>${item.price} €</p>
+					<p>Coloris : ${localStorage.key(i).split(",")[1]}</p>
+				</div>
+				<div class="cart__item__content__settings">
+					<div class="cart__item__content__settings__quantity">
+						<p>Qté : </p>
+						<input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${localStorage.getItem(localStorage.key(i))}">
+					</div>
+					<div class="cart__item__content__settings__delete">
+						<p class="deleteItem">Supprimer</p>
+					</div>
+				</div>
+			</div>
+		</article>
+		`;
+		htmlRender += htmlContent;
+	}
+	itemContainer.innerHTML += htmlRender;
 
-/* Get all the delete btn, link them to they'r DOM and localStorage article, add a listener 
-to remove them on click. */
+	// Enable deleting item function
+	deleteItem();
+	// Enable quantity modification
+	itemQuantityRefresh();
+	// Initialise the amount total of article
+	totalItemInCartRefresh();
+	// Initialise the total price of the cart
+	totalPriceRefresh();
+})();
+
+/*** ITEMS DATA MANIPULATION ***/
+
+// Actualise the total price of the cart
+function totalPriceRefresh() {
+	let quantitySelector = document.querySelectorAll(".itemQuantity");
+	let totalCartPrice = 0;
+	for (let i = 0; i < quantitySelector.length; i++) {
+		let articleDOM = quantitySelector[i].closest("article");
+		let individualPrice = articleDOM.dataset.price;
+		totalCartPrice += parseInt(quantitySelector[i].value) * individualPrice;
+	}
+	let totalPriceDisplay = document.getElementById("totalPrice");
+	totalPriceDisplay.innerHTML = totalCartPrice;
+}
+
+// Actualise the total amount of article in the cart
+function totalItemInCartRefresh() {
+	let quantitySelector = document.querySelectorAll(".itemQuantity");
+	let itemAmount = 0;
+	for (let i = 0; i < quantitySelector.length; i++) {
+		itemAmount += parseInt(quantitySelector[i].value);
+	}
+	const totalQuantityDisplay = document.getElementById("totalQuantity");
+	totalQuantityDisplay.innerHTML = itemAmount;
+
+	// Call new total price function on change
+	totalPriceRefresh();
+	// Check if they'r is no article
+	checkIfCartEmpty();
+}
+
+// Deleting item work on the DOM and localStorage
 function deleteItem() {
 	let deleteItemBtns = document.querySelectorAll(".deleteItem");
-
 	for (let i = 0; i < deleteItemBtns.length; i++) {
 		deleteItemBtns[i].addEventListener("click", (e) => {
 			e.preventDefault();
 
 			let articleDOM = deleteItemBtns[i].closest("article");
-			let articleId = articleDOM.dataset.id;
-			let articleColor = articleDOM.dataset.color;
-			let articleQuantity = localStorage.getItem(localStorage.key(i));
-
-			let localStorageKey = [articleId, articleColor];
-
-			localStorage.removeItem(localStorageKey, articleQuantity);
+			let itemId = articleDOM.dataset.id;
+			let itemColor = articleDOM.dataset.color;
+			let itemQuantity = localStorage.getItem(localStorage.key(i));
+			let localStorageKey = [itemId, itemColor];
+			// Deleting in localStorage and in the DOM
+			localStorage.removeItem(localStorageKey, itemQuantity);
 			articleDOM.remove();
 
-			// Actualising the total amount of article
-			totalArticleActualisation();
+			// Actualising the total amount of item in the cart
+			totalItemInCartRefresh();
 		});
 	}
 }
 
-/* Get all the quantity input , link them to they'r DOM and localStorage, add a listener 
-to change them. */
-function articleQuantityActualisation() {
+// Modifying item quantity in total and localStorage
+function itemQuantityRefresh() {
 	let quantitySelector = document.querySelectorAll(".itemQuantity");
 	for (let i = 0; i < quantitySelector.length; i++) {
 		quantitySelector[i].addEventListener("change", (e) => {
 			e.preventDefault();
 
-			// For each article
 			let articleDOM = quantitySelector[i].closest("article");
-			let articleId = articleDOM.dataset.id;
-			let articleColor = articleDOM.dataset.color;
-
-			let localStorageKey = [articleId, articleColor];
-
+			let itemId = articleDOM.dataset.id;
+			let itemColor = articleDOM.dataset.color;
+			let localStorageKey = [itemId, itemColor];
 			let itemQuantity = e.target.value;
 			if (itemQuantity == 0) {
 				alert("Il faut au moins ajouter un Kanap 🛋️");
@@ -121,66 +137,12 @@ function articleQuantityActualisation() {
 			localStorage.setItem(localStorageKey, itemQuantity);
 
 			// Actualising the total amount of article
-			totalArticleActualisation();
+			totalItemInCartRefresh();
 		});
 	}
 }
 
-// Actualise the total amount of article in the cart
-function totalArticleActualisation() {
-	let quantitySelector = document.querySelectorAll(".itemQuantity");
-	let articleAmount = 0;
-
-	for (let i = 0; i < quantitySelector.length; i++) {
-		articleAmount += parseInt(quantitySelector[i].value);
-	}
-	let totalQuantityDisplay = document.getElementById("totalQuantity");
-	totalQuantityDisplay.innerHTML = articleAmount;
-
-	totalPriceActualisation();
-}
-
-// Actualise the total price for the cart
-function totalPriceActualisation() {
-	let quantitySelector = document.querySelectorAll(".itemQuantity");
-	let totalCartPrice = 0;
-
-	for (let i = 0; i < quantitySelector.length; i++) {
-		let articleDOM = quantitySelector[i].closest("article");
-		let individualPrice = articleDOM.dataset.price;
-
-		totalCartPrice += parseInt(quantitySelector[i].value) * individualPrice;
-	}
-
-	let totalPriceDisplay = document.getElementById("totalPrice");
-	totalPriceDisplay.innerHTML = totalCartPrice;
-
-	// Check if they'r is no article
-	checkIfCartEmpty();
-}
-
-/*** 
-USER DATA MANIPULATION
-***/
-
-// Get cart products information => Array
-function productToSend() {
-	let userBasket = [];
-
-	for (let i = 0; i < localStorage.length; i++) {
-		let idColor = localStorage.key(i);
-		// let quantity = localStorage.getItem(idColor);
-
-		let idColorArray = idColor.split(",");
-		let id = idColorArray[0];
-		// let color = idColorArray[1];
-
-		// let productInfo = [id, color, quantity];
-		userBasket.push(id);
-	}
-
-	return userBasket;
-}
+/*** USER DATA MANIPULATION ***/
 
 // Object for user input
 class Form {
@@ -259,6 +221,19 @@ function userInputVerification() {
 	}
 }
 
+// Push cart products id in an array
+function productToSend() {
+	let userBasket = [];
+	for (let i = 0; i < localStorage.length; i++) {
+		let idColor = localStorage.key(i);
+		let idColorArray = idColor.split(",");
+		let id = idColorArray[0];
+		userBasket.push(id);
+	}
+	return userBasket;
+}
+
+// Send info to the back if valid, request orderId
 let userFormSubmit = document.getElementById("order");
 userFormSubmit.addEventListener("click", (e) => {
 	e.preventDefault();
@@ -285,13 +260,13 @@ userFormSubmit.addEventListener("click", (e) => {
 			body: JSON.stringify(toSend),
 		})
 			// Storing order Id in the url
-			.then((res) => res.json())
-			.then((val) => {
+			.then((response) => response.json())
+			.then((value) => {
 				localStorage.clear();
-				document.location.href = `./confirmation.html?id=${val.orderId}`;
+				document.location.href = `./confirmation.html?id=${value.orderId}`;
 			})
-			.catch((err) => {
-				console.log("Error: " + err);
+			.catch((error) => {
+				console.log("Error: " + error);
 			});
 	}
 });
