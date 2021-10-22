@@ -31,7 +31,7 @@ Clone this repo. From the "back" folder of the project, run npm install. You can
 
 -   Javascript only.
 
-##Preview
+## Preview
 
 ![Screenchot-preview](./front/images/cap1.PNG)
 ![Screenchot-preview](./front/images/cap2.PNG)
