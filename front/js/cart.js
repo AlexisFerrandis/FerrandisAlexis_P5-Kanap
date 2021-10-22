@@ -33,6 +33,7 @@ async function renderEachItem() {
             <div class="cart__item__content__titlePrice">
                 <h2>${item.name}</h2>
                 <p>${item.price} €</p>
+				<p>Coloris : ${localStorage.key(i).split(",")[1]}</p>
             </div>
             <div class="cart__item__content__settings">
                 <div class="cart__item__content__settings__quantity">
@@ -57,7 +58,7 @@ async function renderEachItem() {
 	articleQuantityActualisation();
 	// Initialise the amount total of article
 	totalArticleActualisation();
-	//Initialise the total price of the cart
+	// Initialise the total price of the cart
 	totalPriceActualisation();
 }
 renderEachItem();
@@ -73,8 +74,8 @@ function checkIfCartEmpty() {
 ARTICLES DATA MANIPULATION
 ***/
 
-/* Get all the delete btn, link them to they'r DOM and localStorage, add a listener 
-to remove them. */
+/* Get all the delete btn, link them to they'r DOM and localStorage article, add a listener 
+to remove them on click. */
 function deleteItem() {
 	let deleteItemBtns = document.querySelectorAll(".deleteItem");
 
@@ -174,13 +175,71 @@ class Form {
 	}
 }
 
-let userForm = new Form();
-let userFirstName = userForm.firstName;
-console.log(userFirstName);
-
-let userFormContainer = document.getElementsByTagName("form");
+// Analysing user input with regex
 let userFormSubmit = document.getElementById("order");
-userFormSubmit.addEventListener("submit", (e) => {
+userFormSubmit.addEventListener("click", (e) => {
 	e.preventDefault();
-	console.log("fire");
+
+	const userForm = new Form();
+
+	// Firstname
+	function firstNameValid() {
+		const userFirstName = userForm.firstName;
+		if (/^[A-Za-z]{3,20}$/.test(userFirstName)) {
+			return true;
+		} else {
+			const firstNameErrorMsg = document.getElementById("firstNameErrorMsg");
+			firstNameErrorMsg.innerText = "Votre prénom ne peut contenir que des lettres, de 3 à 20 caractères.";
+		}
+	}
+
+	// Lastname
+	function lastNameValid() {
+		const userLastName = userForm.lastName;
+		if (/^[A-Za-z]{2,20}$/.test(userLastName)) {
+			return true;
+		} else {
+			const lastNameErrorMsg = document.getElementById("lastNameErrorMsg");
+			lastNameErrorMsg.innerText = "Votre nom ne peut contenir que des lettres, de 2 à 20 caractères.";
+		}
+	}
+
+	// Adresse
+	function adressValid() {
+		const userAdress = userForm.adress;
+		if (/^[a-zA-Z_0-9]{1,30}$/.test(userAdress)) {
+			return true;
+		} else {
+			const addressErrorMsg = document.getElementById("addressErrorMsg");
+			addressErrorMsg.innerText = "L'adresse ne peut pas dépasser les 30 caractères.";
+		}
+	}
+
+	// City
+	function cityValid() {
+		const userCity = userForm.city;
+		if (/^[A-Za-z]{2,20}$/.test(userCity)) {
+			return true;
+		} else {
+			const cityErrorMsg = document.getElementById("cityErrorMsg");
+			cityErrorMsg.innerText = "La ville ne peut contenir que des lettres, de 2 à 20 caractères.";
+		}
+	}
+
+	// Mail
+	function mailValid() {
+		const userMail = userForm.mail;
+		if (/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(userMail)) {
+			return true;
+		} else {
+			const emailErrorMsg = document.getElementById("emailErrorMsg");
+			emailErrorMsg.innerText = "Il faut renseigner une adresse mail valide.";
+		}
+	}
+
+	if (firstNameValid() && lastNameValid() && adressValid() && cityValid() && mailValid()) {
+		console.log("send");
+	} else {
+		alert(" Veuillez remplir le formulaire correctement.");
+	}
 });
