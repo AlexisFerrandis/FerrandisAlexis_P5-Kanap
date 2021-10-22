@@ -33,6 +33,6 @@ Clone this repo. From the "back" folder of the project, run npm install. You can
 
 ## Preview
 
-![Screenchot-preview](./front/images/cap1.PNG)
-![Screenchot-preview](./front/images/cap2.PNG)
-![Screenchot-preview](./front/images/cap3.PNG)
+![Screenchot-preview](./front/images/git-img/cap1.PNG)
+![Screenchot-preview](./front/images/git-img/cap2.PNG)
+![Screenchot-preview](./front/images/git-img/cap3.PNG)
