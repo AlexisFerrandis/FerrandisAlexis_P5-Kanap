@@ -163,83 +163,135 @@ function totalPriceActualisation() {
 USER DATA MANIPULATION
 ***/
 
-let userBasket = [];
+// Get cart products information => Array
+function productToSend() {
+	let userBasket = [];
 
+	for (let i = 0; i < localStorage.length; i++) {
+		let idColor = localStorage.key(i);
+		// let quantity = localStorage.getItem(idColor);
+
+		let idColorArray = idColor.split(",");
+		let id = idColorArray[0];
+		// let color = idColorArray[1];
+
+		// let productInfo = [id, color, quantity];
+		userBasket.push(id);
+	}
+
+	return userBasket;
+}
+
+// Object for user input
 class Form {
-	constructor(input) {
+	constructor() {
 		this.firstName = document.getElementById("firstName").value;
 		this.lastName = document.getElementById("lastName").value;
 		this.adress = document.getElementById("address").value;
 		this.city = document.getElementById("city").value;
-		this.mail = document.getElementById("email").value;
+		this.email = document.getElementById("email").value;
 	}
 }
 
 // Analysing user input with regex
+function userInputVerification() {
+	const userForm = new Form();
+	// Firstname
+	function firstNameValid() {
+		const userFirstName = userForm.firstName;
+		const firstNameErrorMsg = document.getElementById("firstNameErrorMsg");
+		if (/^([A-Za-z]{3,20})?([-]{0,1})?([A-Za-z]{3,20})$/.test(userFirstName)) {
+			firstNameErrorMsg.innerText = "";
+			return true;
+		} else {
+			firstNameErrorMsg.innerText = "Votre prénom ne peut contenir que des lettres, de 3 à 20 caractères.";
+		}
+	}
+	// Lastname
+	function lastNameValid() {
+		const userLastName = userForm.lastName;
+		const lastNameErrorMsg = document.getElementById("lastNameErrorMsg");
+		if (/^[A-Za-z]{2,20}$/.test(userLastName)) {
+			lastNameErrorMsg.innerText = "";
+			return true;
+		} else {
+			lastNameErrorMsg.innerText = "Votre nom ne peut contenir que des lettres, de 2 à 20 caractères.";
+		}
+	}
+	// Adresse
+	function adressValid() {
+		const userAdress = userForm.adress;
+		const addressErrorMsg = document.getElementById("addressErrorMsg");
+		if (/[^§]{5,50}$/.test(userAdress)) {
+			addressErrorMsg.innerText = "";
+			return true;
+		} else {
+			addressErrorMsg.innerText = "L'adresse semble incorrect.";
+		}
+	}
+	// City
+	function cityValid() {
+		const userCity = userForm.city;
+		const cityErrorMsg = document.getElementById("cityErrorMsg");
+		if (/^[A-Za-z]{2,20}$/.test(userCity)) {
+			cityErrorMsg.innerText = "";
+			return true;
+		} else {
+			cityErrorMsg.innerText = "La ville ne peut contenir que des lettres, de 2 à 20 caractères.";
+		}
+	}
+	// Email
+	function emailValid() {
+		const userEmail = userForm.email;
+		const emailErrorMsg = document.getElementById("emailErrorMsg");
+		if (/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(userEmail)) {
+			emailErrorMsg.innerText = "";
+			return true;
+		} else {
+			emailErrorMsg.innerText = "Il faut renseigner une adresse email valide.";
+		}
+	}
+
+	if (firstNameValid() && lastNameValid() && adressValid() && cityValid() && emailValid()) {
+		return true;
+	} else {
+		console.log("Unvalid form input.");
+	}
+}
+
 let userFormSubmit = document.getElementById("order");
 userFormSubmit.addEventListener("click", (e) => {
 	e.preventDefault();
 
-	const userForm = new Form();
-
-	// Firstname
-	function firstNameValid() {
-		const userFirstName = userForm.firstName;
-		if (/^[A-Za-z]{3,20}$/.test(userFirstName)) {
-			return true;
-		} else {
-			const firstNameErrorMsg = document.getElementById("firstNameErrorMsg");
-			firstNameErrorMsg.innerText = "Votre prénom ne peut contenir que des lettres, de 3 à 20 caractères.";
-		}
-	}
-
-	// Lastname
-	function lastNameValid() {
-		const userLastName = userForm.lastName;
-		if (/^[A-Za-z]{2,20}$/.test(userLastName)) {
-			return true;
-		} else {
-			const lastNameErrorMsg = document.getElementById("lastNameErrorMsg");
-			lastNameErrorMsg.innerText = "Votre nom ne peut contenir que des lettres, de 2 à 20 caractères.";
-		}
-	}
-
-	// Adresse
-	function adressValid() {
-		const userAdress = userForm.adress;
-		if (/^[a-zA-Z_0-9]{1,30}$/.test(userAdress)) {
-			return true;
-		} else {
-			const addressErrorMsg = document.getElementById("addressErrorMsg");
-			addressErrorMsg.innerText = "L'adresse ne peut pas dépasser les 30 caractères.";
-		}
-	}
-
-	// City
-	function cityValid() {
-		const userCity = userForm.city;
-		if (/^[A-Za-z]{2,20}$/.test(userCity)) {
-			return true;
-		} else {
-			const cityErrorMsg = document.getElementById("cityErrorMsg");
-			cityErrorMsg.innerText = "La ville ne peut contenir que des lettres, de 2 à 20 caractères.";
-		}
-	}
-
-	// Mail
-	function mailValid() {
-		const userMail = userForm.mail;
-		if (/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(userMail)) {
-			return true;
-		} else {
-			const emailErrorMsg = document.getElementById("emailErrorMsg");
-			emailErrorMsg.innerText = "Il faut renseigner une adresse mail valide.";
-		}
-	}
-
-	if (firstNameValid() && lastNameValid() && adressValid() && cityValid() && mailValid()) {
-		console.log("send");
-	} else {
-		alert(" Veuillez remplir le formulaire correctement.");
+	if (userInputVerification()) {
+		const products = productToSend();
+		const toSend = {
+			contact: {
+				firstName: firstName.value,
+				lastName: lastName.value,
+				address: address.value,
+				city: city.value,
+				email: email.value,
+			},
+			products,
+		};
+		// POSTing on the API
+		fetch("http://localhost:3000/api/products/order", {
+			method: "POST",
+			headers: {
+				Accept: "application/json",
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(toSend),
+		})
+			// Storing order Id in the url
+			.then((res) => res.json())
+			.then((val) => {
+				localStorage.clear();
+				document.location.href = `./confirmation.html?id=${val.orderId}`;
+			})
+			.catch((err) => {
+				console.log("Error: " + err);
+			});
 	}
 });
