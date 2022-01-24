@@ -29,7 +29,7 @@ Clone this repo. From the "back" folder of the project, run npm install. You can
 
 ## Technologies
 
--   Javascript only.
+-   Vanilla Javascript.
 
 ## Preview
 
